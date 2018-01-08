@@ -17,6 +17,7 @@ J = 0;
 % J = sum((h - y) .^ 2)/(2*m)
 predictions = X * theta;              % predictions of hypothesis on examples
 sqrErrors   = (predictions - y) .^ 2; % squared errors
+%sqrErrors = (X * theta - y)' * (X * theta - y)
 
 J = sum(sqrErrors) / (2 * m);
 
