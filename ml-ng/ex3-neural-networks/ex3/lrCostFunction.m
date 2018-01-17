@@ -36,14 +36,22 @@ grad = zeros(size(theta));
 %           grad = grad + YOUR_CODE_HERE (using the temp variable)
 %
 
+% this is exactly the same as what we did in ex2 for constFunctionReg.m
+% h = g(z) z = X * theta
+% g(z) = sigmoid(z)
 
+h = sigmoid(X * theta)
 
+J = (-y' * log(h) - (1-y)' * log(1-h)) / m
 
+grad = X' * (h - y) / m
 
-
-
-
-
+% do not penalize theta zero
+theta_reg = theta
+theta_reg(1) = 0 
+% do regularization
+J = J + (lambda / (2 * m)) * sum(theta_reg .^ 2)
+grad = grad + (lambda / m) * theta_reg;
 
 % =============================================================
 
