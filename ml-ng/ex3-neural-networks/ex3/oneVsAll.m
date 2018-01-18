@@ -49,15 +49,21 @@ X = [ones(m, 1) X];
 %                 initial_theta, options);
 %
 
+for c = 1:num_labels
+     % Set Initial theta
+     initial_theta = zeros(n + 1, 1);
+
      % Set options for fminunc
      options = optimset('GradObj', 'on', 'MaxIter', 50);
-     c = 1:10;
+
      % Run fmincg to obtain the optimal theta
-     % This function will return theta and the cost 
+     % This function will return theta and the cost
      [theta] = ...
          fmincg (@(t)(lrCostFunction(t, X, (y == c), lambda)), ...
-                 all_theta, options);
+                 initial_theta, options);
 
+    all_theta(c, :) = theta;
+endfor
 % =========================================================================
 
 
