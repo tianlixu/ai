@@ -84,7 +84,12 @@ endfor
 %               and Theta2_grad from Part 2.
 %
 
+% do not penalize theta zero                                           
+theta1_reg = Theta1(:,2:end)
+theta2_reg = Theta2(:,2:end)
 
+% do regularization                   
+J += (sum((theta1_reg .^ 2)(:)) + sum((theta2_reg .^ 2)(:))) * lambda / (2 * m)
 
 
 
