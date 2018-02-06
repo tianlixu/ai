@@ -52,7 +52,13 @@ A2 = [ones(m, 1) A2];
 Z3 = A2 * Theta2';
 A3 = sigmoid(Z3);
 
+Y = eye(num_labels);
 
+for c = 1:m
+    a3 = A3(c,:);
+    y3 = Y(:, y(c));
+    J += (-log(a3) * y3 - log(1 - a3) * (1 - y3)) / m
+endfor
 
 %
 % Part 2: Implement the backpropagation algorithm to compute the gradients
