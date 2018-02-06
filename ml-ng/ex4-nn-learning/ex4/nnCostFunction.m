@@ -42,21 +42,25 @@ Theta2_grad = zeros(size(Theta2));
 %         computed in ex4.m
 
 % add x0
-X = [ones(m, 1) X];
-
-Z2 = X * Theta1';
+%% A1: m x 401
+A1 = [ones(m, 1) X]; 
+%% Z2: m x 25
+Z2 = A1 * Theta1';
+%% A2: m x 25
 A2 = sigmoid(Z2);
 
 % add a0
+%% A2: m x 26
 A2 = [ones(m, 1) A2];
+%% Z3: m x 10
 Z3 = A2 * Theta2';
+%% A3: m x 10
 A3 = sigmoid(Z3);
 
 Y = eye(num_labels);
-
-for c = 1:m
-    a3 = A3(c,:);
-    y3 = Y(:, y(c));
+for t = 1:m
+    a3 = A3(t, :);
+    y3 = Y(:, y(t));
     J += (-log(a3) * y3 - log(1 - a3) * (1 - y3)) / m
 endfor
 
@@ -76,6 +80,17 @@ endfor
 %               over the training examples if you are implementing it for the 
 %               first time.
 %
+for t = 1:m
+    a3 = A3(t, :);
+    y3 = Y(:, y(t))
+    d3 = (a3 - y3')
+
+    z2 = Z2(t, :);
+    gz2 = sigmoidGradient(z2);
+    d2 = 
+endfor
+
+
 % Part 3: Implement regularization with the cost function and gradients.
 %
 %         Hint: You can implement this around the code for
