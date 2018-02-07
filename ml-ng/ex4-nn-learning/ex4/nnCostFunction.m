@@ -1,6 +1,5 @@
 %% TODO:
-%% 1. using only one for-loop and make every lower case letter a vector
-%% 2. replace for-loop by vectorizing the calculation
+%% replace for-loop by vectorizing the calculation
 function [J grad] = nnCostFunction(nn_params, ...
                                    input_layer_size, ...
                                    hidden_layer_size, ...
@@ -45,40 +44,6 @@ Theta2_grad = zeros(size(Theta2));
 %         variable J. After implementing Part 1, you can verify that your
 %         cost function computation is correct by verifying the cost
 %         computed in ex4.m
-
-%% Note:
-%% the calculation here makes sure every row in Ai(A1, A2, A3) is an input 
-%% training example for the next layer
-
-% add x0=1
-%% X: m x input_layer_size
-%% A1: m x (input_layer_size + 1)
-A1 = [ones(m, 1) X];
-
-%% Z2: m x hidden_layer_size
-Z2 = A1 * Theta1';
-
-%% A2: m x hidden_layer_size
-A2 = sigmoid(Z2);
-
-% add a0=1
-%% A2: m x (hidden_layer_size + 1)
-A2 = [ones(m, 1) A2];
-
-%% Z3: m x num_labels
-Z3 = A2 * Theta2';
-
-%% A3: m x num_labels
-A3 = sigmoid(Z3);
-
-
-I = eye(num_labels);
-for t = 1:m
-    a3 = A3(t, :); %% a3' is a vector
-    y3 = I(:, y(t));
-    J += (-log(a3) * y3 - log(1 - a3) * (1 - y3)) / m
-end
-
 %
 % Part 2: Implement the backpropagation algorithm to compute the gradients
 %         Theta1_grad and Theta2_grad. You should return the partial derivatives of
@@ -95,27 +60,6 @@ end
 %               over the training examples if you are implementing it for the 
 %               first time.
 %
-
-for t = 1:m
-    a3 = A3(t, :);
-    y3 = I(:, y(t));
-    d3 = a3 - y3';
-
-    z2 = Z2(t, :);
-    a2 = A2(t, :);
-    dgz = a2 .* (1 - a2);
-    d2 = d3 * Theta2 .* dgz;
-
-    a1 = A1(t, :);
-
-    Theta2_grad += d3' * a2;
-    Theta1_grad += d2(2:end)' * a1
-end
-
-Theta1_grad = Theta1_grad / m;
-Theta2_grad = Theta2_grad / m;
-
-
 % Part 3: Implement regularization with the cost function and gradients.
 %
 %         Hint: You can implement this around the code for
@@ -123,14 +67,62 @@ Theta2_grad = Theta2_grad / m;
 %               the regularization separately and then add them to Theta1_grad
 %               and Theta2_grad from Part 2.
 %
+%% Note:
+%% just as what you see from the NN architecture, the calculation here
+%% makes sure every column in Ai(A1, A2, A3) is an input training example
+%% for the next layer
 
-% do not penalize theta zero                                           
+%% X: m x input_layer_size
+%% A1: (input_layer_size + 1) x m
+%% add row x0=1
+A1 = [ones(1, m); X'];
+
+%% Z2: hidden_layer_size x m
+Z2 = Theta1 * A1;
+
+%% A2: hidden_layer_size x m
+A2 = sigmoid(Z2);
+
+%% add row a0=1
+%% A2: (hidden_layer_size + 1) x m
+A2 = [ones(1, m); A2];
+
+%% Z3: num_labels x m
+Z3 = Theta2 * A2;
+
+%% A3: num_labels * m
+A3 = sigmoid(Z3);
+
+
+I = eye(num_labels);
+for t = 1:m
+    a3 = A3(:, t);
+    y3 = I(:, y(t));
+    J += -y3' * log(a3) - (1 - y3') * log(1 - a3);
+    d3 = a3 - y3;
+
+    z2 = Z2(:, t);
+    a2 = A2(:, t);
+    dgz = a2 .* (1 - a2);
+    d2 = Theta2' * d3 .* dgz;
+
+    a1 = A1(:, t);
+
+    Theta2_grad += d3 * a2';
+    Theta1_grad += d2(2:end) * a1';
+end
+
+J /= m;
+Theta1_grad /= m;
+Theta2_grad /= m;
+
+%% do not penalize theta zero                                           
 theta1_reg = Theta1;
 theta1_reg(:, 1) = 0
 theta2_reg = Theta2;
 theta2_reg(:, 1) = 0;
 
-% do regularization                   
+%% do regularization                   
 J += (sum((theta1_reg .^ 2)(:)) + sum((theta2_reg .^ 2)(:))) * lambda / (2 * m)
 Theta1_grad += (lambda / m) * theta1_reg;
 Theta2_grad += (lambda / m) * theta2_reg;
