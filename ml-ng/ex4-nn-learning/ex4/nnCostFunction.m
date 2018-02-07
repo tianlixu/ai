@@ -1,3 +1,6 @@
+%% TODO:
+%% 1. using only one for-loop and make every lower case letter a vector
+%% 2. replace for-loop by vectorizing the calculation
 function [J grad] = nnCostFunction(nn_params, ...
                                    input_layer_size, ...
                                    hidden_layer_size, ...
@@ -16,9 +19,11 @@ function [J grad] = nnCostFunction(nn_params, ...
 
 % Reshape nn_params back into the parameters Theta1 and Theta2, the weight matrices
 % for our 2 layer neural network
+%% Theta1: hidden_layer_size x (input_layer_size + 1)
 Theta1 = reshape(nn_params(1:hidden_layer_size * (input_layer_size + 1)), ...
                  hidden_layer_size, (input_layer_size + 1));
 
+%% Theta2: num_labels x (hidden_layer_size + 1)
 Theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):end), ...
                  num_labels, (hidden_layer_size + 1));
 
@@ -41,28 +46,38 @@ Theta2_grad = zeros(size(Theta2));
 %         cost function computation is correct by verifying the cost
 %         computed in ex4.m
 
-% add x0
-%% A1: m x 401
-A1 = [ones(m, 1) X]; 
-%% Z2: m x 25
+%% Note:
+%% the calculation here makes sure every row in Ai(A1, A2, A3) is an input 
+%% training example for the next layer
+
+% add x0=1
+%% X: m x input_layer_size
+%% A1: m x (input_layer_size + 1)
+A1 = [ones(m, 1) X];
+
+%% Z2: m x hidden_layer_size
 Z2 = A1 * Theta1';
-%% A2: m x 25
+
+%% A2: m x hidden_layer_size
 A2 = sigmoid(Z2);
 
-% add a0
-%% A2: m x 26
+% add a0=1
+%% A2: m x (hidden_layer_size + 1)
 A2 = [ones(m, 1) A2];
-%% Z3: m x 10
+
+%% Z3: m x num_labels
 Z3 = A2 * Theta2';
-%% A3: m x 10
+
+%% A3: m x num_labels
 A3 = sigmoid(Z3);
 
-Y = eye(num_labels);
+
+I = eye(num_labels);
 for t = 1:m
-    a3 = A3(t, :);
-    y3 = Y(:, y(t));
+    a3 = A3(t, :); %% a3' is a vector
+    y3 = I(:, y(t));
     J += (-log(a3) * y3 - log(1 - a3) * (1 - y3)) / m
-endfor
+end
 
 %
 % Part 2: Implement the backpropagation algorithm to compute the gradients
@@ -80,15 +95,25 @@ endfor
 %               over the training examples if you are implementing it for the 
 %               first time.
 %
+
 for t = 1:m
     a3 = A3(t, :);
-    y3 = Y(:, y(t))
-    d3 = (a3 - y3')
+    y3 = I(:, y(t));
+    d3 = a3 - y3';
 
     z2 = Z2(t, :);
-    gz2 = sigmoidGradient(z2);
-    d2 = 
-endfor
+    a2 = A2(t, :);
+    dgz = a2 .* (1 - a2);
+    d2 = d3 * Theta2 .* dgz;
+
+    a1 = A1(t, :);
+
+    Theta2_grad += d3' * a2;
+    Theta1_grad += d2(2:end)' * a1
+end
+
+Theta1_grad = Theta1_grad / m;
+Theta2_grad = Theta2_grad / m;
 
 
 % Part 3: Implement regularization with the cost function and gradients.
@@ -100,26 +125,15 @@ endfor
 %
 
 % do not penalize theta zero                                           
-theta1_reg = Theta1(:,2:end)
-theta2_reg = Theta2(:,2:end)
+theta1_reg = Theta1;
+theta1_reg(:, 1) = 0
+theta2_reg = Theta2;
+theta2_reg(:, 1) = 0;
 
 % do regularization                   
 J += (sum((theta1_reg .^ 2)(:)) + sum((theta2_reg .^ 2)(:))) * lambda / (2 * m)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Theta1_grad += (lambda / m) * theta1_reg;
+Theta2_grad += (lambda / m) * theta2_reg;
 
 
 % -------------------------------------------------------------
