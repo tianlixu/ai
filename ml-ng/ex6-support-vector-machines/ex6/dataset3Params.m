@@ -23,11 +23,23 @@ sigma = 0.3;
 %        mean(double(predictions ~= yval))
 %
 
+step_vec = [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30];
+length = length(step_vec);
+E = zeros(length, length);
 
+for i = 1:length
+    C = step_vec(i);
+    for j = 1:length
+        sigma = step_vec(j);
+        model = svmTrain(X, y, C, @(x1, x2) gaussianKernel(x1, x2, sigma));
+        predictions = svmPredict(model, Xval);
+        E(i,j) = mean(double(predictions ~= yval));
+    end
+end
 
-
-
-
+[i, j] = find(E == min(E(:)))
+C = step_vec(i);
+sigma = step_vec(j);
 
 % =========================================================================
 
