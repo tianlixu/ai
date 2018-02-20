@@ -21,11 +21,14 @@ idx = zeros(size(X,1), 1);
 % Note: You can use a for-loop over the examples to compute this.
 %
 
+for i = 1:size(X, 1)
+    xi = X(i,:)
+    P = (xi - centroids) .^ 2
+    p = sum(P, 2)
+    [p_min, p_idx] = min(p)
 
-
-
-
-
+    idx(i) = p_idx
+end
 
 % =============================================================
 
