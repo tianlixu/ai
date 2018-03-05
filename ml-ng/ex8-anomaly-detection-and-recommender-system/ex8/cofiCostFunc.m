@@ -58,8 +58,8 @@ J += (sum(sum(Theta .^ 2)) + sum(sum(X .^ 2))) * lambda / 2;
 X_grad = Error_rating * Theta;
 Theta_grad = Error_rating' * X;
 %% regularization
-X_grad = X_grad + lambda * X;
-Theta_grad = Theta_grad + lambda * Theta;
+X_grad += lambda * X;
+Theta_grad += lambda * Theta;
 
 % =============================================================
 
